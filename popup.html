@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Workday Autofill</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      width: 380px;
+      background: #f8fafc;
+      color: #1e293b;
+      font-size: 13px;
+    }
+
+    header {
+      background: #0071ce;
+      color: white;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    header .logo { font-size: 22px; }
+    header h1 { font-size: 15px; font-weight: 600; line-height: 1.2; }
+    header p  { font-size: 11px; opacity: 0.8; margin-top: 2px; }
+
+    .tabs {
+      display: flex;
+      background: #e2e8f0;
+      border-bottom: 1px solid #cbd5e1;
+    }
+    .tab {
+      flex: 1;
+      padding: 9px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      color: #64748b;
+      border: none;
+      background: none;
+      transition: all 0.15s;
+    }
+    .tab.active {
+      background: #f8fafc;
+      color: #0071ce;
+      border-bottom: 2px solid #0071ce;
+    }
+
+    .panel { display: none; padding: 14px 16px; }
+    .panel.active { display: block; }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #64748b;
+      margin: 14px 0 8px;
+    }
+    .section-title:first-child { margin-top: 0; }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .field-row.full { grid-template-columns: 1fr; }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    label {
+      font-size: 11px;
+      font-weight: 500;
+      color: #475569;
+    }
+    input, select, textarea {
+      padding: 7px 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 12px;
+      color: #1e293b;
+      background: white;
+      transition: border-color 0.15s;
+      font-family: inherit;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #0071ce;
+      box-shadow: 0 0 0 2px rgba(0,113,206,0.15);
+    }
+    textarea { resize: vertical; min-height: 60px; }
+
+    .actions {
+      padding: 12px 16px;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      gap: 8px;
+      background: white;
+    }
+    .btn {
+      flex: 1;
+      padding: 9px 16px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .btn:hover { opacity: 0.88; }
+    .btn-primary { background: #0071ce; color: white; }
+    .btn-secondary { background: #e2e8f0; color: #1e293b; }
+    .btn-fill { background: #16a34a; color: white; }
+
+    #status-msg {
+      padding: 8px 16px;
+      font-size: 12px;
+      color: #16a34a;
+      text-align: center;
+      min-height: 28px;
+    }
+
+    /* Info panel */
+    .info-card {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+    .info-card h3 { font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+    .info-card p  { font-size: 11px; color: #64748b; line-height: 1.5; }
+    .field-pill {
+      display: inline-block;
+      background: #e0f2fe;
+      color: #0369a1;
+      border-radius: 4px;
+      padding: 2px 7px;
+      font-size: 10px;
+      font-weight: 600;
+      margin: 2px 2px 2px 0;
+    }
+    #page-info { font-size: 11px; color: #64748b; padding: 10px 0; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">⚡</div>
+  <div>
+    <h1>Workday Autofill</h1>
+    <p>Save your profile once, apply anywhere</p>
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="tab active" data-tab="profile">My Profile</button>
+  <button class="tab" data-tab="page">Page Info</button>
+</div>
+
+
+<div class="panel active" id="tab-profile">
+
+  <p class="section-title">Personal</p>
+  <div class="field-row">
+    <div class="field">
+      <label>First Name</label>
+      <input type="text" id="firstName" placeholder="Jane" />
+    </div>
+    <div class="field">
+      <label>Last Name</label>
+      <input type="text" id="lastName" placeholder="Doe" />
+    </div>
+  </div>
+
+  <div class="field-row full" style="margin-top:8px">
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="email" placeholder="jane@example.com" />
+    </div>
+  </div>
+
+  <div class="field-row" style="margin-top:8px">
+    <div class="field">
+      <label>Phone</label>
+      <input type="tel" id="phone" placeholder="5551234567" />
+    </div>
+    <div class="field">
+      <label>Phone Country</label>
+      <input type="text" id="phoneCountryCode" placeholder="United States" />
+    </div>
+  </div>
+
+  <p class="section-title">Address</p>
+  <div class="field-row full">
+    <div class="field">
+      <label>Street Address</label>
+      <input type="text" id="addressLine1" placeholder="123 Main St" />
+    </div>
+  </div>
+  <div class="field-row full" style="margin-top:8px">
+    <div class="field">
+      <label>Suite / Apt (optional)</label>
+      <input type="text" id="addressLine2" placeholder="Apt 4B" />
+    </div>
+  </div>
+  <div class="field-row" style="margin-top:8px">
+    <div class="field">
+      <label>City</label>
+      <input type="text" id="city" placeholder="San Francisco" />
+    </div>
+    <div class="field">
+      <label>ZIP Code</label>
+      <input type="text" id="zipCode" placeholder="94105" />
+    </div>
+  </div>
+  <div class="field-row" style="margin-top:8px">
+    <div class="field">
+      <label>State</label>
+      <input type="text" id="state" placeholder="California" />
+    </div>
+    <div class="field">
+      <label>Country</label>
+      <input type="text" id="country" placeholder="United States of America" />
+    </div>
+  </div>
+
+  <p class="section-title">Work Authorization</p>
+  <div class="field-row">
+    <div class="field">
+      <label>Authorization Type</label>
+      <input type="text" id="workAuthorization" placeholder="U.S. Citizen" />
+    </div>
+    <div class="field">
+      <label>Requires Sponsorship</label>
+      <select id="requiresSponsorship">
+        <option value="">-- select --</option>
+        <option value="No">No</option>
+        <option value="Yes">Yes</option>
+      </select>
+    </div>
+  </div>
+
+  <p class="section-title">Application Extras</p>
+  <div class="field-row full">
+    <div class="field">
+      <label>LinkedIn URL</label>
+      <input type="url" id="linkedIn" placeholder="https://linkedin.com/in/janedoe" />
+    </div>
+  </div>
+  <div class="field-row full" style="margin-top:8px">
+    <div class="field">
+      <label>Portfolio / Website</label>
+      <input type="url" id="website" placeholder="https://janedoe.dev" />
+    </div>
+  </div>
+  <div class="field-row" style="margin-top:8px">
+    <div class="field">
+      <label>Expected Salary</label>
+      <input type="text" id="expectedSalary" placeholder="120000" />
+    </div>
+    <div class="field">
+      <label>Years of Experience</label>
+      <input type="text" id="yearsOfExperience" placeholder="5" />
+    </div>
+  </div>
+  <div class="field-row full" style="margin-top:8px">
+    <div class="field">
+      <label>How did you hear about us?</label>
+      <input type="text" id="referralSource" placeholder="LinkedIn" />
+    </div>
+  </div>
+
+  <p class="section-title">EEO (Optional — leave blank to skip)</p>
+  <div class="field-row">
+    <div class="field">
+      <label>Gender</label>
+      <input type="text" id="gender" placeholder="Female" />
+    </div>
+    <div class="field">
+      <label>Ethnicity</label>
+      <input type="text" id="ethnicity" placeholder="Asian" />
+    </div>
+  </div>
+
+</div>
+
+
+<div class="panel" id="tab-page">
+  <div id="page-info">Loading page info…</div>
+</div>
+
+<div id="status-msg"></div>
+
+<div class="actions">
+  <button class="btn btn-secondary" id="btn-save">Save Profile</button>
+  <button class="btn btn-fill" id="btn-fill">⚡ Fill Now</button>
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>
